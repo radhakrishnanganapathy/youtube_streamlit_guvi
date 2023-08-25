@@ -2,9 +2,12 @@ import streamlit as st
 from googleapiclient.discovery import build
 import pandas as pd
 from googleapiclient.errors import HttpError
+from mongodb import *
+from mysql import *
 
 st.header("Youtube Channel Analysis - Radhakrishnan G")
 st.write("Welcome to your first Streamlit app!")
+
 
 def handle_exception(e):
     if "quota" in str(e).lower():
@@ -13,7 +16,7 @@ def handle_exception(e):
         print("An error occurred:", str(e))
     return None
 
-'''-----------------------------Channel info-------------------------------------------'''
+#'''-----------------------------Channel info-------------------------------------------'''
 
 def youtube_Channel_analysis(youtube,api_key,channel_id):
     try:
@@ -28,6 +31,7 @@ def youtube_Channel_analysis(youtube,api_key,channel_id):
             except KeyError:
                 country = "Country information not available"
             channel_data = {
+                "channel_id" : channelID,
                 "channel_name" : channel_request['items'][0]['snippet']['title'],
                 "subscribers" : channel_request['items'][0]['statistics']['subscriberCount'],
                 "view_count" : channel_request['items'][0]['statistics']['viewCount'],
@@ -37,14 +41,14 @@ def youtube_Channel_analysis(youtube,api_key,channel_id):
                 "description" : channel_request['items'][0]['snippet']['description']
             }
             channel_info.append(channel_data)
-            
+        save_to_mongodb_channel(channel_info)
         st.header("Channel info:")
         st.write(pd.DataFrame(channel_info))
     except HttpError as e:
         st.write("Quota exceeded. Please wait and try again later")
         return handle_exception(e)
     
-'''-----------------------------PlayList info-------------------------------------------'''
+#'''-----------------------------PlayList info-------------------------------------------'''
 
 def get_playlist_info(youtube,api_key,channel_id):
     try:
@@ -74,14 +78,14 @@ def get_playlist_info(youtube,api_key,channel_id):
                 next_page_token = playlist_response.get("nextPageToken")
                 if not next_page_token:
                     break
-                
+        save_to_mongodb_playlist(playlist_info)
         st.header("Playlist info:")
         st.write(pd.DataFrame(playlist_info))
     except HttpError as e:
         st.write("Quota exceeded. Please wait and try again later")
         return handle_exception(e)
 
-'''-----------------------------Video info-------------------------------------------'''
+#'''-----------------------------Video info-------------------------------------------'''
 
 
 def get_video_info(youtube,api_key,channel_id):
@@ -137,6 +141,7 @@ def get_video_info(youtube,api_key,channel_id):
                         "playlist_id" :playlist_id,
                     }
                     video_info.append(data)
+        save_to_mongodb_videos(video_info)
         st.header("Video info:")
         st.write(pd.DataFrame(video_info))
     except HttpError as e:
@@ -165,14 +170,19 @@ def get_comment_info(youtube,api_key,videos):
                 comment_text = comment_snippet["topLevelComment"]["snippet"]["textDisplay"]
 
                 data = {
+                    "video_id" :videoID,
                     "userName" :userName,
                     "user_id" :user_id,
                     "comment_text":comment_text
                 }
+                comments_info.append(data)
             if "nextPageToken" in comment_response:
                 next_page_token = comment_response["nextPageToken"]
             else:
                 break
+        save_to_mongodb_comments(comments_info)
+        st.header("Comments info:")
+        st.write(pd.DataFrame(comments_info))
     except HttpError as e:
         st.write("Quota exceeded. Please wait and try again later")
         return handle_exception(e)
@@ -191,3 +201,5 @@ youtube_Channel_analysis(youtube,api_key,channel_id)
 get_playlist_info(youtube,api_key,channel_id)
 get_video_info(youtube,api_key,channel_id)
 get_comment_info(youtube,api_key,videos)
+
+migrate_to_mysql()
