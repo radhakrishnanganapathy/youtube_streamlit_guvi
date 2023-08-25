@@ -9,8 +9,9 @@ pymongo
 SQLAlchemy
 pymysql
 
-# run cmd
+# activate virtual env
   venv\Sources\activate
+# run cmd
   streamlit run app.py
 
 # mongodb connection
