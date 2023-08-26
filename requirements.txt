@@ -5,5 +5,4 @@ pymongo
 SQLAlchemy
 pymysql
 sqlalchemy
-mysqlclient
 
