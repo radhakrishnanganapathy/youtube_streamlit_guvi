@@ -101,7 +101,7 @@ def migrate_to_mysql(mongodbURL,MysqlUrl):
         )
         session.add(playlist)
     session.commit()
-    
+
     for data in video_collection.find():
         video = Videos(
           video_id = data['video_id'],
