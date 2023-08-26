@@ -41,44 +41,53 @@ def youtube_Channel_analysis(youtube,api_key,channel_id):
                 "description" : channel_request['items'][0]['snippet']['description']
             }
             channel_info.append(channel_data)
-        save_to_mongodb_channel(channel_info)
+        save_to_mongodb_channel(channel_info,mongodbURL)
         st.header("Channel info:")
         st.write(pd.DataFrame(channel_info))
     except HttpError as e:
-        st.write("Quota exceeded. Please wait and try again later")
+        st.write("Quota. Please wait and try again later")
         return handle_exception(e)
     
 #'''-----------------------------PlayList info-------------------------------------------'''
 
-def get_playlist_info(youtube,api_key,channel_id):
+def get_playlist_info(youtube,api_key,channel_id,resultLimit,pageLimit):
     try:
         playlist_info = []
         next_page_token = None
         for channelID in channel_id:
-            while True:
+            for i in range(pageLimit):
                 playlist_response = youtube.playlists().list(
                     part = 'snippet',
-                    channelId = channel_id,
-                    maxResults = 50,
+                    channelId = channelID,
+                    maxResults = resultLimit,
                     pageToken = next_page_token
                 ).execute()
-                for playlist in playlist_response["items"]:
-                    playlist_id = playlist["id"]
-                    playlist_title = playlist["snippet"]["title"]
-                    playlist_description = playlist["snippet"]["description"]
+                if "items" in playlist_response:
+                    for playlist in playlist_response["items"]:
+                        playlist_id = playlist["id"]
+                        playlist_title = playlist["snippet"]["title"]
+                        playlist_description = playlist["snippet"]["description"]
 
+                        data = {
+                            "channel_id" : channelID,
+                            "playlist_id" : playlist_id,
+                            "playlist_title" :playlist_title,
+                            "playlist_description":playlist_description
+
+                        }
+                        playlist_info.append(data)
+                else :
                     data = {
                         "channel_id" : channelID,
-                        "playlist_id" : playlist_id,
-                        "playlist_title" :playlist_title,
-                        "playlist_description":playlist_description
-
+                        "playlist_id" : None,
+                        "playlist_title" :"playlist not created by user",
+                        "playlist_description":None
                     }
                     playlist_info.append(data)
                 next_page_token = playlist_response.get("nextPageToken")
                 if not next_page_token:
                     break
-        save_to_mongodb_playlist(playlist_info)
+        save_to_mongodb_playlist(playlist_info,mongodbURL)
         st.header("Playlist info:")
         st.write(pd.DataFrame(playlist_info))
     except HttpError as e:
@@ -88,28 +97,27 @@ def get_playlist_info(youtube,api_key,channel_id):
 #'''-----------------------------Video info-------------------------------------------'''
 
 
-def get_video_info(youtube,api_key,channel_id):
-    try:
+def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
+    # try:
         next_page_token = None
         video_info = []
         for channelID in channel_id:
-            while True:
+            for i in range(pageLimit):
                 video_response = youtube.search().list(
                     part="id",
                     channelId = channelID,
-                    maxResults = 50,
+                    maxResults = resultLimit,
                     type = "video",
                     pageToken = next_page_token
                 ).execute()
                 if "items" in video_response:
-                    videos.append(video_response["items"])
+                    videos.extend(video_response["items"])
                 
                 next_page_token = video_response.get("nextPageToken")
                 if not next_page_token:
                     break
             for video in videos:
                 videoID = video["id"]["videoId"]
-
                 video_info_response = youtube.videos().list(
                     part="snippet,statistics",
                     id=videoID
@@ -123,14 +131,18 @@ def get_video_info(youtube,api_key,channel_id):
                     video_description = video_snippet["description"]
                     comment_count = video_statistics["commentCount"]
                     like_count = video_statistics["likeCount"]
-                    playlist_id = None
                     playlist_response = youtube.playlistItems().list(
                         part = "snippet",
-                        videoId = videoID,
-                        maxresults = 50,
+                        id = videoID,
+                        maxResults = resultLimit,
                     ).execute()
                     if "items" in playlist_response:
-                        playlist_id = playlist_response["items"][0]["snippet"]["playlistId"]
+                        if playlist_response["items"]:
+                            playlist_id = playlist_response["items"][0]["snippet"]["playlistId"]
+                        else:
+                            playlist_id = None
+                    else:
+                        playlist_id = None
 
                     data = {
                         "video_id" : videoID,
@@ -141,29 +153,31 @@ def get_video_info(youtube,api_key,channel_id):
                         "playlist_id" :playlist_id,
                     }
                     video_info.append(data)
-        save_to_mongodb_videos(video_info)
+        save_to_mongodb_videos(video_info,mongodbURL)
         st.header("Video info:")
         st.write(pd.DataFrame(video_info))
-    except HttpError as e:
-        st.write("Quota exceeded. Please wait and try again later")
-        return handle_exception(e)
+    # except HttpError as e:
+    #     st.write("Quota exceeded. Please wait and try again later")
+    #     return handle_exception(e)
     
 #'''-----------------------------Comment info-------------------------------------------'''
 
-def get_comment_info(youtube,api_key,videos):
-    try:
+def get_comment_info(youtube,api_key,resultLimit):
+    try:    
+        video_id = get_videos_id(mongodbURL)
+        # videoss =['dD4GyhSQMR0']
         next_page_token = None
         comments_info = []
         comments = []
-        for videoID in videos:
+        for videoID in video_id:
             comment_response = youtube.commentThreads().list(
                 part = "snippet",
                 videoId = videoID,
-                maxResults=100,
+                maxResults=resultLimit,
                 pageToken = next_page_token
             ).execute()
 
-            if "items" in comment_response:
+            if "items" in comment_response and len(comment_response["items"])>0:
                 comment_snippet = comment_response["items"][0]["snippet"]
                 userName = comment_snippet["topLevelComment"]["snippet"]["authorDisplayName"]
                 user_id = comment_snippet["topLevelComment"]["snippet"]["authorChannelId"]["value"]
@@ -176,19 +190,34 @@ def get_comment_info(youtube,api_key,videos):
                     "comment_text":comment_text
                 }
                 comments_info.append(data)
+            else:
+                data = {
+                    "video_id" :videoID,
+                    "userName" :None,
+                    "user_id" :None,
+                    "comment_text":"no comment for this video"
+                }
+                comments_info.append(data)
+
             if "nextPageToken" in comment_response:
                 next_page_token = comment_response["nextPageToken"]
             else:
                 break
-        save_to_mongodb_comments(comments_info)
+        save_to_mongodb_comments(comments_info,mongodbURL)
         st.header("Comments info:")
         st.write(pd.DataFrame(comments_info))
     except HttpError as e:
-        st.write("Quota exceeded. Please wait and try again later")
+        st.write("Quota exceeded. Please wait and try again later",e)
         return handle_exception(e)
 
 api_key = st.sidebar.text_input("API KEY :")
 channel_ids = st.sidebar.text_input("Channel ID :")
+resultLimit = st.sidebar.number_input("Result Limt : ",value=0, step=1, format="%d")
+pageLimit = st.sidebar.number_input("Page Limt : ",value=0, step=1, format="%d")
+mongodbURL = st.sidebar.text_input("MongoDb Url : ",placeholder="e.g : mongodb://localhost:27017/")
+MysqlUrl = st.sidebar.text_input("MySQL Url : ",placeholder="e.g. mysql://username:password@localhost:port/dbname")
+
+
 videos = []
 # playlist_max_page = st.sidebar.number_input("playlist_max_page_no :")
 channel_id = channel_ids.split(",")
@@ -198,8 +227,7 @@ data = ['UC6rE8DCMFYDcxOlvYG3JtBw,UCTIuWYnWo-7CmYZqXD8WFRA,UCGR1yjrScqezllTc2gsA
 st.sidebar.write(data)
 # for channelID in channel_id:
 youtube_Channel_analysis(youtube,api_key,channel_id)
-get_playlist_info(youtube,api_key,channel_id)
-get_video_info(youtube,api_key,channel_id)
-get_comment_info(youtube,api_key,videos)
-
-migrate_to_mysql()
+get_playlist_info(youtube,api_key,channel_id,resultLimit,pageLimit)
+get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit)
+get_comment_info(youtube,api_key,resultLimit)
+migrate_to_mysql(mongodbURL,MysqlUrl)
