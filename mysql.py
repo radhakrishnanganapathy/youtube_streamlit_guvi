@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, Column, String, Integer, Text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from pymongo import MongoClient
-import MySQLdb
+# import MySQLdb
 import streamlit as st
 
 # Define the database connection
