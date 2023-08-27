@@ -5,7 +5,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from pymongo import MongoClient
 import streamlit as st
 import toml
+import os
 # Define the database connection
+secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit/secrets.toml")
+
 secrets = toml.load(".streamlit/secrets.toml")
 
 def migrate_to_mysql():
