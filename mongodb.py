@@ -2,7 +2,10 @@
 from pymongo import MongoClient
 
 def save_to_mongodb_channel(data,mongodbURL):
-    client = MongoClient(mongodbURL)
+    client = MongoClient(mongodbURL,
+    serverSelectionTimeoutMS=5000,  # Set a timeout value in milliseconds
+    connectTimeoutMS=5000,         # Set a connection timeout value in milliseconds
+    retryWrites=True  )
     db = client['youtube']
     channel_collection = db["channel_collection"]
     channel_collection.insert_many(data)

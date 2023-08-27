@@ -2,6 +2,9 @@ import streamlit as st
 from googleapiclient.discovery import build
 import pandas as pd
 from googleapiclient.errors import HttpError
+from google.auth.exceptions import DefaultCredentialsError
+# from googleapiclient.errors import ConfigurationError
+
 from mongodb import *
 from mysql import *
 
@@ -20,33 +23,46 @@ def handle_exception(e):
 
 def youtube_Channel_analysis(youtube,api_key,channel_id):
     try:
-        channel_info = []
-        for channelID in channel_id:
-            channel_request = youtube.channels().list(
-                part= 'snippet,contentDetails,statistics',
-                id = channelID
-            ).execute()
-            try:
-                country = channel_request['items'][0]['snippet']['country']
-            except KeyError:
-                country = "Country information not available"
-            channel_data = {
-                "channel_id" : channelID,
-                "channel_name" : channel_request['items'][0]['snippet']['title'],
-                "subscribers" : channel_request['items'][0]['statistics']['subscriberCount'],
-                "view_count" : channel_request['items'][0]['statistics']['viewCount'],
-                "total_videos" : channel_request['items'][0]['statistics']['videoCount'],
-                "publishedAt" : channel_request['items'][0]['snippet']['publishedAt'],
-                "Country" : country,
-                "description" : channel_request['items'][0]['snippet']['description']
-            }
-            channel_info.append(channel_data)
-        save_to_mongodb_channel(channel_info,mongodbURL)
-        st.header("Channel info:")
-        st.write(pd.DataFrame(channel_info))
+        if api_key is None and channel_id is None:
+            return (st.write("Please enter your api key and channel id"))
+        else:
+            channel_info = []
+            for channelID in channel_id:
+                channel_request = youtube.channels().list(
+                    part= 'snippet,contentDetails,statistics',
+                    id = channelID
+                ).execute()
+                try:
+                    country = channel_request['items'][0]['snippet']['country']
+                except KeyError:
+                    country = "Country information not available"
+                channel_data = {
+                    "channel_id" : channelID,
+                    "channel_name" : channel_request['items'][0]['snippet']['title'],
+                    "subscribers" : channel_request['items'][0]['statistics']['subscriberCount'],
+                    "view_count" : channel_request['items'][0]['statistics']['viewCount'],
+                    "total_videos" : channel_request['items'][0]['statistics']['videoCount'],
+                    "publishedAt" : channel_request['items'][0]['snippet']['publishedAt'],
+                    "Country" : country,
+                    "description" : channel_request['items'][0]['snippet']['description']
+                }
+                channel_info.append(channel_data)
+            save_to_mongodb_channel(channel_info,mongodbURL)
+            st.header("Channel info:")
+            st.write(pd.DataFrame(channel_info))
     except HttpError as e:
-        st.write("Quota. Please wait and try again later")
+        st.write("Quota. Please wait and try again later", e)
         return handle_exception(e)
+    except Exception as ce:
+        st.write("your db url is invalid or Please enter your db url ", ce)
+        return handle_exception(ce)
+    except DefaultCredentialsError as dce:
+        st.write("Please enter your API Key", dce)
+        return handle_exception(dce)
+    except KeyError as ke:
+        st.write("Please enter any channel id")
+        return handle_exception(ke)
+    
     
 #'''-----------------------------PlayList info-------------------------------------------'''
 
@@ -93,12 +109,18 @@ def get_playlist_info(youtube,api_key,channel_id,resultLimit,pageLimit):
     except HttpError as e:
         st.write("Quota exceeded. Please wait and try again later")
         return handle_exception(e)
+    except Exception   as ce:
+        st.write("your db url is invalid or Please enter your db url ", ce)
+    except DefaultCredentialsError as dce:
+        st.write("Please enter your API Key", dce)
+    except KeyError as ke:
+        st.write("Please enter any channel id")
 
 #'''-----------------------------Video info-------------------------------------------'''
 
 
 def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
-    # try:
+    try:
         next_page_token = None
         video_info = []
         for channelID in channel_id:
@@ -156,9 +178,15 @@ def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
         save_to_mongodb_videos(video_info,mongodbURL)
         st.header("Video info:")
         st.write(pd.DataFrame(video_info))
-    # except HttpError as e:
-    #     st.write("Quota exceeded. Please wait and try again later")
-    #     return handle_exception(e)
+    except HttpError as e:
+        st.write("Quota exceeded. Please wait and try again later")
+        return handle_exception(e)
+    except Exception   as ce:
+        st.write("your db url is invalid or Please enter your db url ", ce)
+    except DefaultCredentialsError as dce:
+        st.write("Please enter your API Key", dce)
+    except KeyError as ke:
+        st.write("Please enter any channel id")
     
 #'''-----------------------------Comment info-------------------------------------------'''
 
@@ -209,6 +237,12 @@ def get_comment_info(youtube,api_key,resultLimit):
     except HttpError as e:
         st.write("Quota exceeded. Please wait and try again later",e)
         return handle_exception(e)
+    except Exception   as ce:
+        st.write("your db url is invalid or Please enter your db url ", ce)
+    except DefaultCredentialsError as dce:
+        st.write("Please enter your API Key", dce)
+    except KeyError as ke:
+        st.write("Please enter any channel id")
 
 api_key = st.sidebar.text_input("API KEY :")
 channel_ids = st.sidebar.text_input("Channel ID :")
