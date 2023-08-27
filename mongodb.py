@@ -6,7 +6,8 @@ secrets = toml.load(".streamlit/secrets.toml")
 
 def save_to_mongodb_channel(data):
     # connection_string = os.environ.get("MONGODB_URI")
-    client = MongoClient(secrets["mongodb"]["connection_url"])
+    # client = MongoClient(secrets["mongodb"]["connection_url"])
+    client = MongoClient("mongodb+srv://radhakrishnanganapathy5:pnvGVTD7rM3kgFTN@radhakrishnan.cozk1ms.mongodb.net/youtube")
     # client = MongoClient(mongodbURL,
     # serverSelectionTimeoutMS=5000,  # Set a timeout value in milliseconds
     # connectTimeoutMS=5000,         # Set a connection timeout value in milliseconds

@@ -6,7 +6,7 @@ from google.auth.exceptions import DefaultCredentialsError
 # from googleapiclient.errors import ConfigurationError
 
 from mongodb import *
-from mysql import *
+from mysql import migrate_to_mysql, check_db_connection
 
 st.header("Youtube Channel Analysis - Radhakrishnan G")
 st.write("Welcome to your first Streamlit app!")
@@ -264,3 +264,4 @@ get_playlist_info(youtube,api_key,channel_id,resultLimit,pageLimit)
 get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit)
 get_comment_info(youtube,api_key,resultLimit)
 migrate_to_mysql()
+check_db_connection()
