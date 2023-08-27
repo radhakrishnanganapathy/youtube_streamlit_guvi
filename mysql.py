@@ -9,7 +9,8 @@ import os
 # Define the database connection
 secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit/secrets.toml")
 
-secrets = toml.load(".streamlit/secrets.toml")
+# secrets = toml.load(".streamlit/secrets.toml")
+secrets = toml.load(secrets_path)
 
 def migrate_to_mysql():
     # DATABASE_URI = MysqlUrl
