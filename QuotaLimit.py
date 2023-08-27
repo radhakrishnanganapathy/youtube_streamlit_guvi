@@ -19,4 +19,10 @@ def check_quota(api_key, youtube):
     except Exception as e:
         st.write("An error occurred:", str(e))
 
-
+'''
+[mysql]
+host = "localhost"
+user = "root"
+password = "root123"
+database = "youtube"
+'''

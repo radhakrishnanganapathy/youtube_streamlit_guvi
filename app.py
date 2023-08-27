@@ -23,45 +23,44 @@ def handle_exception(e):
 
 def youtube_Channel_analysis(youtube,api_key,channel_id):
     try:
-        if api_key is None and channel_id is None:
-            return (st.write("Please enter your api key and channel id"))
-        else:
-            channel_info = []
-            for channelID in channel_id:
-                channel_request = youtube.channels().list(
-                    part= 'snippet,contentDetails,statistics',
-                    id = channelID
-                ).execute()
-                try:
-                    country = channel_request['items'][0]['snippet']['country']
-                except KeyError:
-                    country = "Country information not available"
-                channel_data = {
-                    "channel_id" : channelID,
-                    "channel_name" : channel_request['items'][0]['snippet']['title'],
-                    "subscribers" : channel_request['items'][0]['statistics']['subscriberCount'],
-                    "view_count" : channel_request['items'][0]['statistics']['viewCount'],
-                    "total_videos" : channel_request['items'][0]['statistics']['videoCount'],
-                    "publishedAt" : channel_request['items'][0]['snippet']['publishedAt'],
-                    "Country" : country,
-                    "description" : channel_request['items'][0]['snippet']['description']
-                }
-                channel_info.append(channel_data)
-            save_to_mongodb_channel(channel_info,mongodbURL)
-            st.header("Channel info:")
-            st.write(pd.DataFrame(channel_info))
-    except HttpError as e:
-        st.write("Quota. Please wait and try again later", e)
-        return handle_exception(e)
-    except Exception as ce:
-        st.write("your db url is invalid or Please enter your db url ", ce)
-        return handle_exception(ce)
-    except DefaultCredentialsError as dce:
-        st.write("Please enter your API Key", dce)
-        return handle_exception(dce)
-    except KeyError as ke:
-        st.write("Please enter any channel id")
-        return handle_exception(ke)
+        if api_key is None:
+            return (st.write("enter api"))
+        channel_info = []
+        for channelID in channel_id:
+            channel_request = youtube.channels().list(
+                part= 'snippet,contentDetails,statistics',
+                id = channelID
+            ).execute()
+            try:
+                country = channel_request['items'][0]['snippet']['country']
+            except KeyError:
+                country = "Country information not available"
+            channel_data = {
+                "channel_id" : channelID,
+                "channel_name" : channel_request['items'][0]['snippet']['title'],
+                "subscribers" : channel_request['items'][0]['statistics']['subscriberCount'],
+                "view_count" : channel_request['items'][0]['statistics']['viewCount'],
+                "total_videos" : channel_request['items'][0]['statistics']['videoCount'],
+                "publishedAt" : channel_request['items'][0]['snippet']['publishedAt'],
+                "Country" : country,
+                "description" : channel_request['items'][0]['snippet']['description']
+            }
+            channel_info.append(channel_data)
+        save_to_mongodb_channel(channel_info)
+        st.header("Channel info:")
+        st.write(pd.DataFrame(channel_info))
+    # except HttpError as e:
+    #     st.write("Quota. Please wait and try again later", e)
+    #     return handle_exception(e)
+    except Exception as e:
+        st.write("your db url is invalid or Please enter your db url ", e)
+        # return handle_exception(ce)
+    # except DefaultCredentialsError as dce:
+    #     st.write("Please enter your API Key", dce)
+    #     return handle_exception(dce)
+    # except KeyError as ke:
+    #     st.write("Please enter any channel id")
+    #     return handle_exception(ke)
     
     
 #'''-----------------------------PlayList info-------------------------------------------'''
@@ -103,18 +102,18 @@ def get_playlist_info(youtube,api_key,channel_id,resultLimit,pageLimit):
                 next_page_token = playlist_response.get("nextPageToken")
                 if not next_page_token:
                     break
-        save_to_mongodb_playlist(playlist_info,mongodbURL)
+        save_to_mongodb_playlist(playlist_info)
         st.header("Playlist info:")
         st.write(pd.DataFrame(playlist_info))
-    except HttpError as e:
-        st.write("Quota exceeded. Please wait and try again later")
-        return handle_exception(e)
+    # except HttpError as e:
+    #     st.write("Quota exceeded. Please wait and try again later")
+    #     return handle_exception(e)
     except Exception   as ce:
         st.write("your db url is invalid or Please enter your db url ", ce)
-    except DefaultCredentialsError as dce:
-        st.write("Please enter your API Key", dce)
-    except KeyError as ke:
-        st.write("Please enter any channel id")
+    # except DefaultCredentialsError as dce:
+    #     st.write("Please enter your API Key", dce)
+    # except KeyError as ke:
+    #     st.write("Please enter any channel id")
 
 #'''-----------------------------Video info-------------------------------------------'''
 
@@ -175,24 +174,24 @@ def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
                         "playlist_id" :playlist_id,
                     }
                     video_info.append(data)
-        save_to_mongodb_videos(video_info,mongodbURL)
+        save_to_mongodb_videos(video_info)
         st.header("Video info:")
         st.write(pd.DataFrame(video_info))
-    except HttpError as e:
-        st.write("Quota exceeded. Please wait and try again later")
-        return handle_exception(e)
+    # except HttpError as e:
+    #     st.write("Quota exceeded. Please wait and try again later")
+    #     return handle_exception(e)
     except Exception   as ce:
         st.write("your db url is invalid or Please enter your db url ", ce)
-    except DefaultCredentialsError as dce:
-        st.write("Please enter your API Key", dce)
-    except KeyError as ke:
-        st.write("Please enter any channel id")
+    # except DefaultCredentialsError as dce:
+    #     st.write("Please enter your API Key", dce)
+    # except KeyError as ke:
+    #     st.write("Please enter any channel id")
     
 #'''-----------------------------Comment info-------------------------------------------'''
 
 def get_comment_info(youtube,api_key,resultLimit):
     try:    
-        video_id = get_videos_id(mongodbURL)
+        video_id = get_videos_id()
         # videoss =['dD4GyhSQMR0']
         next_page_token = None
         comments_info = []
@@ -231,25 +230,25 @@ def get_comment_info(youtube,api_key,resultLimit):
                 next_page_token = comment_response["nextPageToken"]
             else:
                 break
-        save_to_mongodb_comments(comments_info,mongodbURL)
+        save_to_mongodb_comments(comments_info)
         st.header("Comments info:")
         st.write(pd.DataFrame(comments_info))
-    except HttpError as e:
-        st.write("Quota exceeded. Please wait and try again later",e)
-        return handle_exception(e)
+    # except HttpError as e:
+    #     st.write("Quota exceeded. Please wait and try again later",e)
+    #     return handle_exception(e)
     except Exception   as ce:
         st.write("your db url is invalid or Please enter your db url ", ce)
-    except DefaultCredentialsError as dce:
-        st.write("Please enter your API Key", dce)
-    except KeyError as ke:
-        st.write("Please enter any channel id")
+    # except DefaultCredentialsError as dce:
+    #     st.write("Please enter your API Key", dce)
+    # except KeyError as ke:
+    #     st.write("Please enter any channel id")
 
 api_key = st.sidebar.text_input("API KEY :")
 channel_ids = st.sidebar.text_input("Channel ID :")
 resultLimit = st.sidebar.number_input("Result Limt : ",value=0, step=1, format="%d")
 pageLimit = st.sidebar.number_input("Page Limt : ",value=0, step=1, format="%d")
-mongodbURL = st.sidebar.text_input("MongoDb Url : ",placeholder="e.g : mongodb://localhost:27017/")
-MysqlUrl = st.sidebar.text_input("MySQL Url : ",placeholder="e.g. mysql://username:password@localhost:port/dbname")
+# mongodbURL = st.sidebar.text_input("MongoDb Url : ",placeholder="e.g : mongodb://localhost:27017/")
+# MysqlUrl = st.sidebar.text_input("MySQL Url : ",placeholder="e.g. mysql://username:password@localhost:port/dbname")
 
 
 videos = []
@@ -264,4 +263,4 @@ youtube_Channel_analysis(youtube,api_key,channel_id)
 get_playlist_info(youtube,api_key,channel_id,resultLimit,pageLimit)
 get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit)
 get_comment_info(youtube,api_key,resultLimit)
-migrate_to_mysql(mongodbURL,MysqlUrl)
+migrate_to_mysql()

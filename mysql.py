@@ -4,10 +4,14 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 from pymongo import MongoClient
 import streamlit as st
-
+import toml
 # Define the database connection
-def migrate_to_mysql(mongodbURL,MysqlUrl):
-    DATABASE_URI = MysqlUrl
+secrets = toml.load(".streamlit/secrets.toml")
+
+def migrate_to_mysql():
+    # DATABASE_URI = MysqlUrl
+    DATABASE_URI = (f"{secrets['mysql']['dialect']}://{secrets['mysql']['user']}:{secrets['mysql']['password']}@"
+                   f"{secrets['mysql']['host']}:{secrets['mysql']['port']}/{secrets['mysql']['database']}")
     engine = create_engine(DATABASE_URI, echo=True)
 
     # Create a base class for declarative models
@@ -54,7 +58,7 @@ def migrate_to_mysql(mongodbURL,MysqlUrl):
         
 
     # Establish MongoDB connection
-    mongo_client = MongoClient(mongodbURL)
+    mongo_client = MongoClient(secrets["mongodb"]["connection_url"])
     db = mongo_client['mydatabase']
     channel_collection = db["channel_collection"]
     playlist_collection = db["playlist_collection"]
