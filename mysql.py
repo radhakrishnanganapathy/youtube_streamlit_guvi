@@ -10,8 +10,8 @@ secrets = toml.load(".streamlit/secrets.toml")
 
 def migrate_to_mysql():
     # DATABASE_URI = MysqlUrl
-    DATABASE_URI = (f"{secrets['mysql']['dialect']}://{secrets['mysql']['user']}:{secrets['mysql']['password']}@"
-                   f"{secrets['mysql']['host']}:{secrets['mysql']['port']}/{secrets['mysql']['database']}")
+    DATABASE_URI = (f"{secrets['postgres']['dialect']}://{secrets['postgres']['user']}:{secrets['postgres']['password']}@"
+                   f"{secrets['postgres']['host']}:{secrets['postgres']['port']}/{secrets['postgres']['database']}")
     engine = create_engine(DATABASE_URI, echo=True)
 
     # Create a base class for declarative models
