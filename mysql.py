@@ -7,15 +7,16 @@ import streamlit as st
 import toml
 import os
 # Define the database connection
-secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit/secrets.toml")
+# secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit/secrets.toml")
 
-# secrets = toml.load(".streamlit/secrets.toml")
-secrets = toml.load(secrets_path)
+secrets = toml.load(".streamlit/secrets.toml")
+# secrets = toml.load(secrets_path)
 
 def migrate_to_mysql():
     # DATABASE_URI = MysqlUrl
-    DATABASE_URI = (f"{secrets['postgres']['dialect']}://{secrets['postgres']['user']}:{secrets['postgres']['password']}@"
-                   f"{secrets['postgres']['host']}:{secrets['postgres']['port']}/{secrets['postgres']['database']}")
+    DATABASE_URI = (f"{secrets['postgresql']['dialect']}://{secrets['postgresql']['user']}:{secrets['postgresql']['password']}@"
+                   f"{secrets['postgresql']['host']}:{secrets['postgresql']['port']}/{secrets['postgresql']['database']}")
+    # DATABASE_URI = "postgres://radhakrishnan:Smo1k1H9nUNsFn7TxNj1d97M6B0QgLCv@dpg-ciqhei59aq0dcpts1ij0-a/demao"
     engine = create_engine(DATABASE_URI, echo=True)
 
     # Create a base class for declarative models

@@ -5,4 +5,15 @@ host = "localhost"
 port = 3306
 user = "root"
 password = "root123"
-database = "youtube"
+database = "youtube"    
+
+[postgresql]
+dialect = "postgresql"
+host = "dpg-ciqhei59aq0dcpts1ij0-a"
+port = 5432
+user = "radhakrishnan"
+password = "demao"
+database = "Smo1k1H9nUNsFn7TxNj1d97M6B0QgLCv"
+
+DATABASE_URI = (f"{secrets['postgres']['dialect']}://{secrets['postgres']['user']}:{secrets['postgres']['password']}@"
+                   f"{secrets['postgres']['host']}:{secrets['postgres']['port']}/{secrets['postgres']['database']}")
