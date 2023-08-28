@@ -4,27 +4,14 @@ import pandas as pd
 from googleapiclient.errors import HttpError
 from google.auth.exceptions import DefaultCredentialsError
 # from googleapiclient.errors import ConfigurationError
-
+# from DataAnalysis import *
 from mongodb import *
-from mysql import migrate_to_mysql, check_db_connection
-
-st.header("Youtube Channel Analysis - Radhakrishnan G")
-st.write("Welcome to your first Streamlit app!")
-
-
-def handle_exception(e):
-    if "quota" in str(e).lower():
-        print("Quota exceeded. Please wait and try again later.")
-    else:
-        print("An error occurred:", str(e))
-    return None
+from mysql import * #migrate_to_mysql, check_db_connection
 
 #'''-----------------------------Channel info-------------------------------------------'''
 
 def youtube_Channel_analysis(youtube,api_key,channel_id):
     try:
-        if api_key is None:
-            return (st.write("enter api"))
         channel_info = []
         for channelID in channel_id:
             channel_request = youtube.channels().list(
@@ -49,19 +36,8 @@ def youtube_Channel_analysis(youtube,api_key,channel_id):
         save_to_mongodb_channel(channel_info)
         st.header("Channel info:")
         st.write(pd.DataFrame(channel_info))
-    # except HttpError as e:
-    #     st.write("Quota. Please wait and try again later", e)
-    #     return handle_exception(e)
     except Exception as e:
-        st.write("your db url is invalid or Please enter your db url ", e)
-        # return handle_exception(ce)
-    # except DefaultCredentialsError as dce:
-    #     st.write("Please enter your API Key", dce)
-    #     return handle_exception(dce)
-    # except KeyError as ke:
-    #     st.write("Please enter any channel id")
-    #     return handle_exception(ke)
-    
+        st.write("Exception", e)
     
 #'''-----------------------------PlayList info-------------------------------------------'''
 
@@ -105,21 +81,14 @@ def get_playlist_info(youtube,api_key,channel_id,resultLimit,pageLimit):
         save_to_mongodb_playlist(playlist_info)
         st.header("Playlist info:")
         st.write(pd.DataFrame(playlist_info))
-    # except HttpError as e:
-    #     st.write("Quota exceeded. Please wait and try again later")
-    #     return handle_exception(e)
     except Exception   as ce:
-        st.write("your db url is invalid or Please enter your db url ", ce)
-    # except DefaultCredentialsError as dce:
-    #     st.write("Please enter your API Key", dce)
-    # except KeyError as ke:
-    #     st.write("Please enter any channel id")
-
+        st.write(ce)
 #'''-----------------------------Video info-------------------------------------------'''
 
 
 def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
     try:
+        videos = []
         next_page_token = None
         video_info = []
         for channelID in channel_id:
@@ -147,10 +116,13 @@ def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
                 if "items" in video_info_response:
                     video_snippet = video_info_response["items"][0]["snippet"]
                     video_statistics = video_info_response["items"][0]["statistics"]
-
+                    
                     video_title = video_snippet["title"]
                     video_description = video_snippet["description"]
-                    comment_count = video_statistics["commentCount"]
+                    try:
+                        comment_count = video_statistics["commentCount"]
+                    except KeyError as ke:
+                        comment_count = None
                     like_count = video_statistics["likeCount"]
                     playlist_response = youtube.playlistItems().list(
                         part = "snippet",
@@ -167,6 +139,7 @@ def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
 
                     data = {
                         "video_id" : videoID,
+                        "channel_id" : channelID,
                         "video_title":video_title,
                         "video_description" : video_description,
                         "comment_count" : comment_count,
@@ -177,16 +150,8 @@ def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
         save_to_mongodb_videos(video_info)
         st.header("Video info:")
         st.write(pd.DataFrame(video_info))
-    # except HttpError as e:
-    #     st.write("Quota exceeded. Please wait and try again later")
-    #     return handle_exception(e)
-    except Exception   as ce:
-        st.write("your db url is invalid or Please enter your db url ", ce)
-    # except DefaultCredentialsError as dce:
-    #     st.write("Please enter your API Key", dce)
-    # except KeyError as ke:
-    #     st.write("Please enter any channel id")
-    
+    except Exception as ce:
+        st.write(ce)
 #'''-----------------------------Comment info-------------------------------------------'''
 
 def get_comment_info(youtube,api_key,resultLimit):
@@ -233,35 +198,10 @@ def get_comment_info(youtube,api_key,resultLimit):
         save_to_mongodb_comments(comments_info)
         st.header("Comments info:")
         st.write(pd.DataFrame(comments_info))
-    # except HttpError as e:
-    #     st.write("Quota exceeded. Please wait and try again later",e)
-    #     return handle_exception(e)
-    except Exception   as ce:
-        st.write("your db url is invalid or Please enter your db url ", ce)
-    # except DefaultCredentialsError as dce:
-    #     st.write("Please enter your API Key", dce)
-    # except KeyError as ke:
-    #     st.write("Please enter any channel id")
+    except Exception as e:
+        return e
 
-api_key = st.sidebar.text_input("API KEY :")
-channel_ids = st.sidebar.text_input("Channel ID :")
-resultLimit = st.sidebar.number_input("Result Limt : ",value=0, step=1, format="%d")
-pageLimit = st.sidebar.number_input("Page Limt : ",value=0, step=1, format="%d")
-# mongodbURL = st.sidebar.text_input("MongoDb Url : ",placeholder="e.g : mongodb://localhost:27017/")
-# MysqlUrl = st.sidebar.text_input("MySQL Url : ",placeholder="e.g. mysql://username:password@localhost:port/dbname")
-
-
-videos = []
-# playlist_max_page = st.sidebar.number_input("playlist_max_page_no :")
-channel_id = channel_ids.split(",")
-youtube = build('youtube','v3', developerKey=api_key)
-st.sidebar.write("Here some ChannelIds")
-data = ['UC6rE8DCMFYDcxOlvYG3JtBw,UCTIuWYnWo-7CmYZqXD8WFRA,UCGR1yjrScqezllTc2gsAIuA,UCwVkm1JU8MZbCITwfwIVQrg,UCYPbbwjbPkXEYx_xZEFvAJg,UCDJRFCKmzfISSFxO4lvCmag,UCPckFo2VPsPJBi2Xz3pk0pA,UCM9zAxQAC7erc9A0xqFg23g,UCXSgUVRaGyjc1Z3wqlsw7Aw,UC8Nt97MD1kNEobv25LqGIqA'],# mr.tamilan
-st.sidebar.write(data)
-# for channelID in channel_id:
-youtube_Channel_analysis(youtube,api_key,channel_id)
-get_playlist_info(youtube,api_key,channel_id,resultLimit,pageLimit)
-get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit)
-get_comment_info(youtube,api_key,resultLimit)
-migrate_to_mysql()
-check_db_connection()
+# migrate_to_mysql()
+# videos_names()
+# check_db_connection()
+# video_channel()

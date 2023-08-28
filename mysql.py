@@ -8,6 +8,7 @@ from pymongo import MongoClient
 import streamlit as st
 import toml
 import os
+import pandas as pd
 # Define the database connection
 # secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit/secrets.toml")
 
@@ -20,7 +21,6 @@ def check_db_connection():
         engine = create_engine(DATABASE_URI)
         try:
             connection = engine.connect()
-            # result = connection.execute("SELECT version()")
             st.write("Database version:", connection)
             connection.close()
             st.write("Database connection is working.")
@@ -70,6 +70,7 @@ def migrate_to_mysql():
     class Videos(Base):
         __tablename__ = 'videos'
         id = Column(Integer,primary_key=True)
+        channel_id = Column(String(255))
         video_id = Column(String(255))
         video_title = Column(String(255))
         video_description = Column(Text)
@@ -105,7 +106,7 @@ def migrate_to_mysql():
         # session.commit()
         
         for data in channel_collection.find():
-            st.write(data)
+            # st.write(data)
             channel = Channel(
             channelid = data['channel_id'],
             channelname = data['channel_name'],
@@ -120,7 +121,7 @@ def migrate_to_mysql():
         # session.commit()
 
         for data in playlist_collection.find():
-            st.write(data)
+            # st.write(data)
             playlist = Playlist(
             channel_id = data['channel_id'],
             playlist_id = data['playlist_id'],
@@ -136,6 +137,7 @@ def migrate_to_mysql():
         for data in video_collection.find():
             video = Videos(
             video_id = data['video_id'],
+            channel_id = data['channel_id'],
             video_title = data['video_title'],
             video_description = data['video_description'],
             comment_count = data['comment_count'],
@@ -151,3 +153,21 @@ def migrate_to_mysql():
         session.close()
         mongo_client.close()
     # return st.write("Data Saved Successully")
+
+#________________________________ Filters Process Guvi Questions ________________________________________________
+def videos_names():
+    DATABASE_URI = (f"{secrets['postgresql']['dialect']}://{secrets['postgresql']['user']}:{secrets['postgresql']['password']}@"
+                   f"{secrets['postgresql']['host']}:{secrets['postgresql']['port']}/{secrets['postgresql']['database']}")
+    # DATABASE_URI = "postgres://radhakrishnan:Smo1k1H9nUNsFn7TxNj1d97M6B0QgLCv@dpg-ciqhei59aq0dcpts1ij0-a.oregon-postgres.render.com:5432/demao"
+    engine = create_engine(DATABASE_URI, echo=True)
+
+    # Create a base class for declarative models
+    Base = declarative_base()
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    # videos_return = session.query(Videos.video_title,Channel.channelname).fiter(Videos.channel_id == Channel.channel_id).all()
+    # st.write(pd.DataFrame(videos_return))
+    db_return = session.query(Channel).filter(Channel.channelid == Videos.channel_id).all()
+    return (db_return)
