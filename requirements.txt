@@ -8,3 +8,4 @@ sqlalchemy
 psycopg2-binary
 toml
 psycopg2
+psycopg2-binary

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text
+from sqlalchemy import Column, Integer, String, Text, func
 from sqlalchemy.orm import Session
 from sqlalchemy.ext.declarative import declarative_base
 from pymongo import MongoClient
@@ -53,7 +53,48 @@ class Channel(Base):
                 }
                 datas.append(data)
             return datas
-
+        def most_video_uploded(db:Session):
+             db_return = db.query(Channel.channelname,Channel.total_videos).order_by(Channel.total_videos.desc()).limit(1).all()
+            #  data = {
+            #       "channel_name" : db_return.channelname,
+            #         "video_count" : db_return.video_count
+            #  }
+             return db_return
+        def top_ten_viewed(db:Session): #top ten views
+             db_return = db.query(Channel.channelname,Videos.video_title,Videos.like_count).filter(Channel.channelid == Videos.channel_id).order_by(Videos.like_count.desc()).limit(10).all()
+             return db_return
+        
+        def comments_of_each_video(db:Session):
+             datas = []
+             db_return = db.query(Videos.comment_count, Videos.video_title).all()
+             for i in db_return:
+                  data = {
+                       "video_title" : i.video_title,
+                       "comment_count": i.comment_count
+                  }
+                  datas.append(data)
+             return datas
+        def top_likes(db:Session):
+             db_return = db.query(Channel.channelname,Videos.video_title,Videos.like_count).filter(Channel.channelid == Videos.channel_id).order_by(Videos.like_count.desc()).limit(1).all()
+             return db_return
+        
+        def most_like_and_dislike(db:Session):
+             db_return = db.query(Channel.channelname,Videos.video_title,Videos.like_count).filter(Channel.channelid == Videos.channel_id).order_by(Videos.like_count.desc()).all()
+             return db_return
+        
+        def total_like_of_channel(db:Session): #view $ likes
+             db_return = db.query(Channel.channelname,Videos.video_title,Videos.like_count).filter(Channel.channelid == Videos.channel_id).order_by(Videos.like_count.desc()).all()
+             return db_return
+        
+        def published_year(db:Session):
+            #  db_return = db.query(Channel.channelname, Channel.published_year).filter(Channel.published_year > )
+             db_return = db.query(Channel).first()
+            #  data = [item.publishedAt for item in  db_return]
+             data = {
+                 "data" : db_return.publishedAt
+            }
+             return data
+             
 class Videos(Base):
         __tablename__ = 'videos'
         id = Column(Integer,primary_key=True)
@@ -80,3 +121,43 @@ class Videos(Base):
             db.commit()
             db.refresh(video)
             return video
+
+class PlayList(Base):
+    __tablename__ = 'playlist'
+    id = Column(Integer,primary_key=True)
+    channel_id = Column(String(255))
+    playlist_id = Column(String(255))
+    playlist_title = Column(String(255))
+    playlist_description = Column(Text)
+    def migrate_playlist(db:Session):
+        for data in playlist_collection.find():
+            # st.write(data)
+            playlist = PlayList(
+            channel_id = data['channel_id'],
+            playlist_id = data['playlist_id'],
+            playlist_title = data['playlist_title'],
+            playlist_description = data['playlist_description'],
+            )
+            db.add(playlist)
+            playlist_coll = db.query(PlayList).all()
+            st.write(playlist_coll)
+
+class Comment(Base):
+        __tablename__ = 'comments'
+        id = Column(Integer, primary_key=True)
+        username = Column(String(255))
+        user_id = Column(String(255))
+        comment_text = Column(Text)
+        video_id = Column(String(255))
+
+        def migrate_comments(db:Session):
+             for document in comment_collection.find():
+                comment = Comment(
+                    username=document['userName'],
+                    user_id=document['user_id'],
+                    comment_text=document['comment_text'],
+                    video_id=document['video_id']
+                )
+                db.add(comment)
+             db.commit()
+             return comment

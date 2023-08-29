@@ -38,8 +38,37 @@ if col4.button("Comments info"):
     comment_return = get_comment_info(youtube,api_key,resultLimit)
     st.write(comment_return)
 
-if st.button("channel data"):
+if st.button("1.channel data"):
         db = next(get_db())
         db_return = Channel.get_channel_name(db)
         st.write(pd.DataFrame(db_return))
+if st.button("2.Most Video"):
+     db = next(get_db())
+     db_return = Channel.most_video_uploded(db)
+     st.write(pd.DataFrame(db_return))
+if st.button("3.Top 10 Video"):
+     db = next(get_db())
+     db_return = Channel.top_ten_viewed(db)
+     st.write(pd.DataFrame(db_return))
+if st.button("4.comment count"):
+     db = next(get_db())
+     db_return = Channel.comments_of_each_video(db)
+     st.write(pd.DataFrame(db_return))
+
+if st.button("5.Most Like"):
+     db = next(get_db())
+     db_return = Channel.top_likes(db)
+     st.write(pd.DataFrame(db_return))
+
+if st.button("6.Like and dislike"):
+     db = next(get_db())
+     db_return = Channel.most_like_and_dislike(db)
+     st.write("Note: There no key value of dislike in statistaics item")
+     st.write(pd.DataFrame(db_return))
+
+if st.button("7.Published 2022"):
+     db = next(get_db())
+     db_return = Channel.published_year(db)
+     st.write(pd.DataFrame(db_return))
+
     
