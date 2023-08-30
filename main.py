@@ -2,9 +2,11 @@ import streamlit as st
 from googleapiclient.discovery import build
 from google.auth.exceptions import DefaultCredentialsError
 from app import *
-from DataAnalysis import *
 from database import get_db, CreateTables
 import pandas as pd
+from Migration import *
+
+
 st.header("Youtube Channel Analysis - Radhakrishnan G")
 pd.set_option('display.max_rows', None)
 
@@ -33,10 +35,14 @@ if col2.button("Video info"):
     st.write(video_return)
 if col3.button("Playlist info"):
     playlist_return = get_playlist_info(youtube,api_key,channel_id,resultLimit,pageLimit)
-    clo4.write(playlist_return)
+    st.write(playlist_return)
 if col4.button("Comments info"):
     comment_return = get_comment_info(youtube,api_key,resultLimit)
     st.write(comment_return)
+
+if st.button("Data migration"):
+    migration()
+    st.write("data Migration")
 
 if st.button("1.channel data"):
         db = next(get_db())

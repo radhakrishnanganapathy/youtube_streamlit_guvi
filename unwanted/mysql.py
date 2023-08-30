@@ -95,14 +95,18 @@ def migrate_to_mysql():
 
     # Migrate data from MongoDB to MySQL
     try:
-        for document in comment_collection.find():
-            comment = Comment(
-                username=document['userName'],
-                user_id=document['user_id'],
-                comment_text=document['comment_text'],
-                video_id=document['video_id']
-            )
-            session.add(comment)
+        mongo_data = list(comment_collection.find())
+        for document in mongo_data:
+            user_id = document['user_id']
+            db_return = db.query(Comment).filter(Comment.user_id == user_id).first()
+            if not db_return :
+                comment = Comment(
+                    username=document['userName'],
+                    user_id=document['user_id'],
+                    comment_text=document['comment_text'],
+                    video_id=document['video_id']
+                )
+                session.add(comment)
         # session.commit()
         
         for data in channel_collection.find():
@@ -154,20 +158,3 @@ def migrate_to_mysql():
         mongo_client.close()
     # return st.write("Data Saved Successully")
 
-#________________________________ Filters Process Guvi Questions ________________________________________________
-def videos_names():
-    DATABASE_URI = (f"{secrets['postgresql']['dialect']}://{secrets['postgresql']['user']}:{secrets['postgresql']['password']}@"
-                   f"{secrets['postgresql']['host']}:{secrets['postgresql']['port']}/{secrets['postgresql']['database']}")
-    # DATABASE_URI = "postgres://radhakrishnan:Smo1k1H9nUNsFn7TxNj1d97M6B0QgLCv@dpg-ciqhei59aq0dcpts1ij0-a.oregon-postgres.render.com:5432/demao"
-    engine = create_engine(DATABASE_URI, echo=True)
-
-    # Create a base class for declarative models
-    Base = declarative_base()
-    Base.metadata.create_all(engine)
-    Session = sessionmaker(bind=engine)
-    session = Session()
-
-    # videos_return = session.query(Videos.video_title,Channel.channelname).fiter(Videos.channel_id == Channel.channel_id).all()
-    # st.write(pd.DataFrame(videos_return))
-    db_return = session.query(Channel).filter(Channel.channelid == Videos.channel_id).all()
-    return (db_return)

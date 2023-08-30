@@ -3,10 +3,7 @@ from googleapiclient.discovery import build
 import pandas as pd
 from googleapiclient.errors import HttpError
 from google.auth.exceptions import DefaultCredentialsError
-# from googleapiclient.errors import ConfigurationError
-# from DataAnalysis import *
 from mongodb import *
-from mysql import * #migrate_to_mysql, check_db_connection
 
 #'''-----------------------------Channel info-------------------------------------------'''
 
