@@ -4,6 +4,8 @@ import pandas as pd
 from googleapiclient.errors import HttpError
 from google.auth.exceptions import DefaultCredentialsError
 from mongodb import *
+from datetime import datetime
+from dateutil import parser
 
 #'''-----------------------------Channel info-------------------------------------------'''
 
@@ -22,10 +24,10 @@ def youtube_Channel_analysis(youtube,api_key,channel_id):
             channel_data = {
                 "channel_id" : channelID,
                 "channel_name" : channel_request['items'][0]['snippet']['title'],
-                "subscribers" : channel_request['items'][0]['statistics']['subscriberCount'],
-                "view_count" : channel_request['items'][0]['statistics']['viewCount'],
-                "total_videos" : channel_request['items'][0]['statistics']['videoCount'],
-                "publishedAt" : channel_request['items'][0]['snippet']['publishedAt'],
+                "subscribers" : int(channel_request['items'][0]['statistics']['subscriberCount']),
+                "view_count" : int(channel_request['items'][0]['statistics']['viewCount']),
+                "total_videos" : int(channel_request['items'][0]['statistics']['videoCount']),
+                "publishedAt" : parser.parse(channel_request['items'][0]['snippet']['publishedAt']).strftime('%d/%m%y'),
                 "Country" : country,
                 "description" : channel_request['items'][0]['snippet']['description']
             }
@@ -117,10 +119,10 @@ def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
                     video_title = video_snippet["title"]
                     video_description = video_snippet["description"]
                     try:
-                        comment_count = video_statistics["commentCount"]
+                        comment_count = int(video_statistics["commentCount"])
                     except KeyError as ke:
                         comment_count = None
-                    like_count = video_statistics["likeCount"]
+                    like_count = int(video_statistics["likeCount"])
                     playlist_response = youtube.playlistItems().list(
                         part = "snippet",
                         id = videoID,

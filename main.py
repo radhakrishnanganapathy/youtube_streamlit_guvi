@@ -5,7 +5,7 @@ from app import *
 from database import get_db, CreateTables
 import pandas as pd
 from Migration import *
-
+from model import *
 
 st.header("Youtube Channel Analysis - Radhakrishnan G")
 pd.set_option('display.max_rows', None)
@@ -25,54 +25,70 @@ try:
 except DefaultCredentialsError as dce:
     st.header("Please Enter your api key")
 
-col1,col2,col3,col4 = st.columns(4)
-
-if col1.button("channel info"):
+col0,col1 = st.columns(2)
+col0.write("Enter a APIKEY, ChannelIDS and page/data limit to get channel data and click here -->")
+if col1.button("GET channel datas"):
     channel_return = youtube_Channel_analysis(youtube,api_key,channel_id)
-    st.write(channel_return)
-if col2.button("Video info"):
     video_return = get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit)
-    st.write(video_return)
-if col3.button("Playlist info"):
     playlist_return = get_playlist_info(youtube,api_key,channel_id,resultLimit,pageLimit)
-    st.write(playlist_return)
-if col4.button("Comments info"):
     comment_return = get_comment_info(youtube,api_key,resultLimit)
+    st.write(channel_return)
+    st.write(video_return)
+    st.write(playlist_return)
     st.write(comment_return)
-
-if st.button("Data migration"):
+col3,clo4 = st.columns(2)
+col3.write("click here to migrate data from mongodb to mysql")
+if clo4.button("Data migration"):
     migration()
     st.write("data Migration")
 
-if st.button("1.channel data"):
-        db = next(get_db())
-        db_return = Channel.get_channel_name(db)
-        st.write(pd.DataFrame(db_return))
-if st.button("2.Most Video"):
+if st.button("1.Names of all the videos and their corresponding channels"):
+    db = next(get_db())
+    db_return = Channel.name_of_all_channel_videos(db)
+    st.write(pd.DataFrame(db_return))
+
+if st.button("2.Channels have the most number of videos, and how many videos do they have"):
      db = next(get_db())
-     db_return = Channel.most_video_uploded(db)
+     db_return = Channel.most_videos_in_channel(db)
      st.write(pd.DataFrame(db_return))
-if st.button("3.Top 10 Video"):
+
+if st.button("3.Top 10 most viewed videos and their respective channels"):
      db = next(get_db())
      db_return = Channel.top_ten_viewed(db)
      st.write(pd.DataFrame(db_return))
-if st.button("4.comment count"):
+
+if st.button("4.Comments were made on each video, and what are their corresponding video names"):
      db = next(get_db())
      db_return = Channel.comments_of_each_video(db)
      st.write(pd.DataFrame(db_return))
 
-if st.button("5.Most Like"):
+if st.button("5.Videos have the highest number of likes, and what are their corresponding channel names"):
      db = next(get_db())
      db_return = Channel.top_likes(db)
      st.write(pd.DataFrame(db_return))
 
-if st.button("6.Like and dislike"):
+if st.button("6.The total number of likes and dislikes for each video, and what are their corresponding video names"):
      db = next(get_db())
      db_return = Channel.most_like_and_dislike(db)
      st.write("Note: There no key value of dislike in statistaics item")
      st.write(pd.DataFrame(db_return))
 
-if st.button("7.Published 2022"):
+if st.button("7.The total number of views for each channel, and what are their corresponding channel names"):
+     db = next(get_db())
+     db_return = Channel.published_year(db)
+     st.write(pd.DataFrame(db_return))
+
+if st.button("8.The names of all the channels that have published videos in the year 2022"):
+     db = next(get_db())
+     db_return = Channel.published_year(db)
+     st.write(pd.DataFrame(db_return))
+
+if st.button("9.The average duration of all videos in each channel, and what are their corresponding channel names"):
+     db = next(get_db())
+     db_return = Channel.published_year(db)
+     st.write(pd.DataFrame(db_return))
+
+if st.button("10.Videos have the highest number of comments, and what are their corresponding channel names"):
      db = next(get_db())
      db_return = Channel.published_year(db)
      st.write(pd.DataFrame(db_return))
