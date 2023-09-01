@@ -10,6 +10,8 @@ import toml
 import os
 import pandas as pd
 from model import *
+from datetime import datetime
+
 # Define the database connection
 # secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit/secrets.toml")
 from database import get_db
@@ -56,9 +58,14 @@ def migration():
                channel_id = data['channel_id'],
                video_title = data['video_title'],
                video_description = data['video_description'],
+               dislike_count = data['dislike_count'],
+               duration = data['duration'],
+               favorite_count = data['favorite_count'],
                comment_count = data['comment_count'],
                like_count = data['like_count'],
+               published_date = data['published_date'],
                playlist_id = data['playlist_id'],
+               view_count = data['view_count']
                )
                db.add(video)
      channel_data = list(channel_collection.find())

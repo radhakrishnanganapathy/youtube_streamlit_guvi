@@ -6,6 +6,7 @@ from google.auth.exceptions import DefaultCredentialsError
 from mongodb import *
 from datetime import datetime
 from dateutil import parser
+import isodate
 
 #'''-----------------------------Channel info-------------------------------------------'''
 
@@ -27,7 +28,7 @@ def youtube_Channel_analysis(youtube,api_key,channel_id):
                 "subscribers" : int(channel_request['items'][0]['statistics']['subscriberCount']),
                 "view_count" : int(channel_request['items'][0]['statistics']['viewCount']),
                 "total_videos" : int(channel_request['items'][0]['statistics']['videoCount']),
-                "publishedAt" : parser.parse(channel_request['items'][0]['snippet']['publishedAt']).strftime('%d/%m%y'),
+                "publishedAt" : parser.parse(channel_request['items'][0]['snippet']['publishedAt']).strftime('%Y-%m-%d'),
                 "Country" : country,
                 "description" : channel_request['items'][0]['snippet']['description']
             }
@@ -108,13 +109,14 @@ def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
             for video in videos:
                 videoID = video["id"]["videoId"]
                 video_info_response = youtube.videos().list(
-                    part="snippet,statistics",
+                    part="snippet,statistics,contentDetails",
                     id=videoID
                 ).execute()
 
                 if "items" in video_info_response:
                     video_snippet = video_info_response["items"][0]["snippet"]
                     video_statistics = video_info_response["items"][0]["statistics"]
+                    video_content = video_info_response['items'][0].get('contentDetails',{})
                     
                     video_title = video_snippet["title"]
                     video_description = video_snippet["description"]
@@ -123,6 +125,14 @@ def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
                     except KeyError as ke:
                         comment_count = None
                     like_count = int(video_statistics["likeCount"])
+                    dislike_count = int(video_statistics.get("dislikeCount",0))
+                    favorite_count = int(video_statistics.get('favoriteCount',0))
+                    duration = video_content['duration']#,"Duration not available")
+                    duration_time = iso8601_to_hhmmss(duration)
+                    # duration = video_response['items'][0]['contentDetails']['duration']
+                    # published_date = video_statistics['publishedAt']
+                    published_date = parser.parse(video_snippet['publishedAt']).strftime('%Y-%m-%d')
+                    view_count = int(video_statistics['likeCount'])
                     playlist_response = youtube.playlistItems().list(
                         part = "snippet",
                         id = videoID,
@@ -143,7 +153,12 @@ def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
                         "video_description" : video_description,
                         "comment_count" : comment_count,
                         "like_count" : like_count,
+                        "dislike_count" : dislike_count,
+                        "favorite_count" : favorite_count,
+                        "published_date" : published_date,
+                        "duration" : duration_time,
                         "playlist_id" :playlist_id,
+                        "view_count" : view_count
                     }
                     video_info.append(data)
         save_to_mongodb_videos(video_info)
@@ -204,3 +219,9 @@ def get_comment_info(youtube,api_key,resultLimit):
 # videos_names()
 # check_db_connection()
 # video_channel()
+
+def iso8601_to_hhmmss(duration):
+    duration_obj = isodate.parse_duration(duration)
+    hours, remainder = divmod(duration_obj.seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
