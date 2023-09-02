@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, Column, String, Integer, Text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 # from sqlalchemy import create_engine
-# from sqlalchemy.dialects.postgresql import psycopg2
+from sqlalchemy.dialects.postgresql import psycopg2
 from pymongo import MongoClient
 import streamlit as st
 import toml
