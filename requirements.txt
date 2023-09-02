@@ -7,4 +7,4 @@ pymysql
 sqlalchemy
 psycopg2-binary
 toml
-
+isodate
