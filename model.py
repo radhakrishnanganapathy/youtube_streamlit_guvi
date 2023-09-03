@@ -1,5 +1,5 @@
 # mysql_connection.py
-from sqlalchemy import create_engine, Column, String, Integer, Text, Date, Interval, func
+from sqlalchemy import create_engine, Column, String, Integer, Text, Date, Interval, func, extract
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 # from sqlalchemy import create_engine
@@ -124,11 +124,11 @@ class Channel(Base):
            return data
      def avg_duration(db:Session):
            data = []
-           db_return = db.query(Channel.channelname, func.avg(Videos.duration).label("avg duration")).filter(Channel.channelid == Videos.channel_id).group_by(Channel.channelname).order_by("avg duration").all()
+           db_return = db.query(Channel.channelname,func.avg(extract('epoch',Videos.duration)).label("avg duration")).filter(Channel.channelid == Videos.channel_id).group_by(Channel.channelname).order_by("avg duration").all()
            for i in db_return:
                  report = {
                        "channelName" : i[0],
-                       "Avg Duration" : i[1]
+                       "Avg Duration" : format_seconds(i[1])
                  }
                  data.append(report)
            return data
@@ -168,3 +168,8 @@ class Videos(Base):
      playlist_id = Column(String(255))
      view_count = Column(Integer,nullable = True, index = True)
         
+
+def format_seconds(seconds):
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    return f"{int(hours)} hours, {int(minutes)} minutes, {int(seconds)} seconds"
