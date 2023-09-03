@@ -8,6 +8,10 @@ pandas
 pymongo
 SQLAlchemy
 pymysql
+sqlalchemy
+psycopg2-binary
+toml
+isodate
 
 # activate virtual env
   venv\Sources\activate
