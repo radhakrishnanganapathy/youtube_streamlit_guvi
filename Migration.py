@@ -35,6 +35,7 @@ def migration():
      DATABASE_URI =  "postgresql://radhakrishnan:1D1sWtcoTVBB7U26tX2EOJ9a1Q4zu82x@dpg-ckp2oi8ujous738qgcdg-a.oregon-postgres.render.com:5432/guviproject"
 
 
+
      engine = create_engine(DATABASE_URI, echo=True)
      Base.metadata.create_all(engine)
      Session = sessionmaker(bind=engine)
