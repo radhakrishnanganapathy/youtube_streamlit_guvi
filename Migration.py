@@ -43,7 +43,9 @@ def migration():
           db = Session()
      
           comment_data = list(comment_collection.find())
+          st.write("comment_data")
           for document in comment_data:
+               st.write("comment_data2")
                user_id = document['user_id']
                db_return = db.query(Comment).filter(Comment.user_id == user_id).first()
                if not db_return :
@@ -56,7 +58,9 @@ def migration():
                     db.add(comment)
      
           video_data = list(video_collection.find())
+          st.write("video_data")
           for data in video_data:
+               st.write("video_data2")
                video_id = data['video_id']
                db_return = db.query(Videos).filter(Videos.video_id == video_id).first()
                if not db_return:
@@ -76,7 +80,9 @@ def migration():
                     )
                     db.add(video)
           channel_data = list(channel_collection.find())
+          st.write("channel_data")
           for data in channel_data:
+               st.write("channel_data1")
                channel_id = data['channel_id']
                db_return = db.query(Channel).filter(Channel.channelid == channel_id).first()
                if not db_return:
@@ -92,7 +98,9 @@ def migration():
                     )
                     db.add(channel)
           playlist_data = list(playlist_collection.find())
+          st.write("playlist_data")
           for data in playlist_data:
+               st.write("playlist_data2")
                playlist_id = data['playlist_id']
                db_return = db.query(Playlist).filter(Playlist.channel_id == playlist_id).first()
                if not db_return:
