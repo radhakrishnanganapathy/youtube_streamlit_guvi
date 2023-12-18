@@ -124,7 +124,7 @@ def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
                         comment_count = int(video_statistics["commentCount"])
                     except KeyError as ke:
                         comment_count = None
-                    like_count = int(video_statistics.get("likeCount",0)
+                    like_count = int(video_statistics.get("likeCount",0))
                     dislike_count = int(video_statistics.get("dislikeCount",0))
                     favorite_count = int(video_statistics.get('favoriteCount',0))
                     duration = video_content['duration']#,"Duration not available")
