@@ -32,7 +32,7 @@ def migration():
      # DATABASE_URI = "postgres://radhakrishnan:Smo1k1H9nUNsFn7TxNj1d97M6B0QgLCv@dpg-ciqhei59aq0dcpts1ij0-a.oregon-postgres.render.com:5432/demao"
      # --------- Below DB_URI is for streamlit online deployment
      # DATABASE_URI =  "postgresql://radhakrishnan:Smo1k1H9nUNsFn7TxNj1d97M6B0QgLCv@dpg-ciqhei59aq0dcpts1ij0-a.oregon-postgres.render.com:5432/demao" 
-     DATABASE_URI =  "postgresql://radhakrishnan:1D1sWtcoTVBB7U26tX2EOJ9a1Q4zu82x@dpg-ckp2oi8ujous738qgcdg-a.oregon-postgres.render.com:5432/guviproject"
+     DATABASE_URI =  "postgres://radhakrishnan:1D1sWtcoTVBB7U26tX2EOJ9a1Q4zu82x@dpg-ckp2oi8ujous738qgcdg-a.oregon-postgres.render.com:5432/guviproject"
 
 
 
