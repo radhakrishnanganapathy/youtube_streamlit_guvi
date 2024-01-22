@@ -14,7 +14,7 @@ def save_to_mongodb_channel(data):
     client.close()
 
 def save_to_mongodb_playlist(data):
-    client = MongoClient(secrets["mongodb"]["connection_url"])
+    client = MongoClient("mongodb+srv://radhakrishnanganapathy5:pnvGVTD7rM3kgFTN@radhakrishnan.cozk1ms.mongodb.net/youtube")
     # client = MongoClient(mongodbURL)
     db = client['youtube']
     playlist_collection = db["playlist_collection"]
@@ -23,7 +23,7 @@ def save_to_mongodb_playlist(data):
 
 def save_to_mongodb_videos(data):
     # client = MongoClient(mongodbURL)
-    client = MongoClient(secrets["mongodb"]["connection_url"])
+    client = MongoClient("mongodb+srv://radhakrishnanganapathy5:pnvGVTD7rM3kgFTN@radhakrishnan.cozk1ms.mongodb.net/youtube")
     db = client['youtube']
     video_collection = db["video_collection"]
     video_collection.insert_many(data)
@@ -31,7 +31,7 @@ def save_to_mongodb_videos(data):
 
 def get_videos_id():
     video_ids = []
-    client = MongoClient(secrets["mongodb"]["connection_url"])
+    client = MongoClient("mongodb+srv://radhakrishnanganapathy5:pnvGVTD7rM3kgFTN@radhakrishnan.cozk1ms.mongodb.net/youtube")
     # client = MongoClient(mongodbURL)
     db = client['youtube']
     video_collection = db["video_collection"]
@@ -44,7 +44,8 @@ def get_videos_id():
     return video_ids
 
 def save_to_mongodb_comments(data):
-    client = MongoClient(secrets["mongodb"]["connection_url"])
+    # client = MongoClient(secrets["mongodb"]["connection_url"])
+    client = MongoClient("mongodb+srv://radhakrishnanganapathy5:pnvGVTD7rM3kgFTN@radhakrishnan.cozk1ms.mongodb.net/youtube")
     # client = MongoClient(mongodbURL)
     db = client['youtube']
     comment_collection = db["comment_collection"]
