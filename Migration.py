@@ -16,12 +16,7 @@ from datetime import datetime
 # secrets_path = os.path.join(os.path.dirname(__file__), ".streamlit/secrets.toml")
 from database import get_db
 
-mongo_client = MongoClient("mongodb+srv://radhakrishnanganapathy5:pnvGVTD7rM3kgFTN@radhakrishnan.cozk1ms.mongodb.net/youtube")
-db = mongo_client['youtube']
-channel_collection = db["channel_collection"]
-playlist_collection = db["playlist_collection"]
-video_collection = db["video_collection"]
-comment_collection = db["comment_collection"]
+
 
 # Base.metadata.create_all(engine)
 # Session = sessionmaker(bind=engine)
@@ -34,6 +29,13 @@ def migration():
      # DATABASE_URI =  "postgresql://radhakrishnan:Smo1k1H9nUNsFn7TxNj1d97M6B0QgLCv@dpg-ciqhei59aq0dcpts1ij0-a.oregon-postgres.render.com:5432/demao" 
      # DATABASE_URI =  "postgresql://radhakrishnan:1D1sWtcoTVBB7U26tX2EOJ9a1Q4zu82x@dpg-ckp2oi8ujous738qgcdg-a.oregon-postgres.render.com:5432/guviproject"
      DATABASE_URI =  "postgresql://guvi_yby8_user:MFyUGk2fbpvmiRZ8FaXIBt56uXD9eMWc@dpg-cmmvudocmk4c73e4qfh0-a.oregon-postgres.render.com:5432/guvi_yby8"
+
+     mongo_client = MongoClient("mongodb+srv://radhakrishnanganapathy5:pnvGVTD7rM3kgFTN@radhakrishnan.cozk1ms.mongodb.net/youtube")
+     db = mongo_client['youtube']
+     channel_collection = db["channel_collection"]
+     playlist_collection = db["playlist_collection"]
+     video_collection = db["video_collection"]
+     comment_collection = db["comment_collection"]
 
 
 
