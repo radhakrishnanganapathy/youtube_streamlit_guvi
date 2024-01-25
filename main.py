@@ -27,10 +27,13 @@ except DefaultCredentialsError as dce:
 
 col0,col1 = st.columns(2)
 col0.write("Enter a APIKEY, ChannelIDS and page/data limit to get channel data and click here -->")
-if col1.button("GET channel datas"):
+if col1.button("chanel"):
     channel_return = youtube_Channel_analysis(youtube,api_key,channel_id)
+if st.button((video"):
     video_return = get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit)
+if st.button("playlist"):
     playlist_return = get_playlist_info(youtube,api_key,channel_id,resultLimit,pageLimit)
+if st.button("comments")
     comment_return = get_comment_info(youtube,api_key,resultLimit)
 #     st.write(channel_return)
 #     st.write(video_return)
