@@ -33,7 +33,7 @@ if st.button("video"):
     video_return = get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit)
 if st.button("playlist"):
     playlist_return = get_playlist_info(youtube,api_key,channel_id,resultLimit,pageLimit)
-if st.button("comments")
+if st.button("comments"):
     comment_return = get_comment_info(youtube,api_key,resultLimit)
 #     st.write(channel_return)
 #     st.write(video_return)
