@@ -132,7 +132,7 @@ def get_video_info(youtube,api_key,channel_id,resultLimit,pageLimit):
                     # duration = video_response['items'][0]['contentDetails']['duration']
                     # published_date = video_statistics['publishedAt']
                     published_date = parser.parse(video_snippet['publishedAt']).strftime('%Y-%m-%d')
-                    view_count = int(video_statistics['likeCount'])
+                    view_count = int(video_statistics['viewCount'])
                     playlist_response = youtube.playlistItems().list(
                         part = "snippet",
                         id = videoID,
